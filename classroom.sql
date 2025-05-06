@@ -121,4 +121,7 @@ where marks between 70 and 74;
 
 --  updating marks of each student by 1
 update stud set marks = marks +1;
+
+
+Set SQL_SAFE_UPDATES = 1;
   
