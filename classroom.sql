@@ -82,10 +82,43 @@ select grade,count(roll_no) from stud group by grade order by grade;
 select city, count(name) from stud group by city;
 select city, count(name) from stud group by city having max(marks) >= 80; 
 
+-- table realed queries  
+--  update
+
+update stud
+set name = 'Bhushan' 
+where roll_no = 105;
 
 
+update stud
+set grade = "A+" 
+where grade = "A";
+
+SET SQL_SAFE_UPDATES = 0;
+
+update stud
+set grade = "B+" 
+where grade = "B";
+
+update stud
+set grade = "A" 
+where grade = "B+";
 
 
+select * from stud;
 
+rollback;
 
+-- updating grades based on their marks.
+update stud set grade = "B+"
+where marks between 75 and 79;
+
+update stud set grade = "A"
+where marks between 80 and 90;
+
+update stud set grade = "B"
+where marks between 70 and 74;
+
+--  updating marks of each student by 1
+update stud set marks = marks +1;
   
