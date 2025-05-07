@@ -100,13 +100,23 @@ teacher.department_id = dept.dept_id;
 -- printing the name of teachers with its appropriate departments.
 select teacher.t_name, dept.dept_name from
 teacher inner join  dept
-where 
+on  
 teacher.department_id = dept.dept_id;
 
+-- at the place of on we can write where also in inner join
 -- alies name like an object or temporary name
 
 select * from teacher as t
 join dept as d
-where 
+on 
 t.department_id = d.dept_id; 
+
+
+-- left join : it return all record from left table and matched record from right table
+
+select * from teacher as t
+left join dept as d
+on t.department_id = d.dept_id; 
+
+
 
