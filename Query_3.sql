@@ -111,12 +111,32 @@ join dept as d
 on 
 t.department_id = d.dept_id; 
 
-
--- left join : it return all record from left table and matched record from right table
+-- Left join : it return all record from left table and matched record from right table
 
 select * from teacher as t
 left join dept as d
 on t.department_id = d.dept_id; 
+
+
+-- Right join : it return all record from right table and matched record from left table
+
+select * from teacher as t
+right join dept as d
+on t.department_id = d.dept_id; 
+
+
+-- Full join or Full outer join : return all data from both the tables
+
+select * from teacher as t
+left join dept as d
+on t.department_id = d.dept_id
+UNION
+select * from teacher as t
+right join dept as d
+on t.department_id = d.dept_id; 
+
+
+
 
 
 
