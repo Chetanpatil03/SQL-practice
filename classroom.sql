@@ -125,5 +125,20 @@ update stud set marks = marks +1;
 --  safe mode used to prevent the unnessary and unwanted update.
 --  SQL_SAFE_UPDATES = 0/1;
 
-select name
+-- select all information of student who have highest number of marks.
+select * from stud where marks = (select max(marks) from stud);
+
+select * from stud;
+
+insert into stud values(106,"Navjit",12,'B',"Jalgoan");
+
+-- delete Command 
+--  used to delete the data from table 
+-- syntax : DELETE FROM TABLE_NAME WHERE CONDITION_
+-- if we do not write the where condition all data can deleted.
+
+-- whant to delete the all record of student whose marks are less than 20 or marks are equal to 20.
+
+DELETE FROM stud WHERE marks = 12;    
+
   
