@@ -32,9 +32,7 @@ INSERT INTO teacher (t_name, department_id) VALUES
 select * from teacher;
 
 
-select teacher.t_name, dept.dept_name from
-teacher join dept
-where 
-teacher.department_id = dept.dept_id;
+
+
 
 
