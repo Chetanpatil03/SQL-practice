@@ -61,8 +61,21 @@ create table students(
 
 desc stud;
 
+-- renames the table 
 alter table students rename to stud;
+
+-- add a column to existing table 
 alter table stud add column marks int not null default 34;
+
+-- drop a column from table
+alter table stud drop column marks;
+
+-- rename column with constraint
+alter table stud change column marks stud_marks int not null;
+
+-- modify the existing column datatype or constraint 
+alter table stud modify stud_marks varchar(25) not null;  
+
 
 
 
