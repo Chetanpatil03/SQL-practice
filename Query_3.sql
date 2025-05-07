@@ -36,3 +36,19 @@ select * from teacher;
 
 
 
+
+
+
+
+
+
+
+-- printing the name of teachers with its appropriate departments.
+ 
+select teacher.t_name, dept.dept_name from
+teacher join dept
+where 
+teacher.department_id = dept.dept_id;
+
+
+
