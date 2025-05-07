@@ -83,26 +83,21 @@ TRUNCATE TABLE stud;
 
 -- joins  inner, left outer,right outer,full outer joins
 
+insert into teacher(t_name) values ("chetan"),("Prafull");
+insert into dept values (6,"Computer"),(7,"Civil");
+
+select * from dept;
+select * from teacher;
+
 -- inner join equal values are in result table
 
- 
 select * from
 teacher join dept
 where 
 teacher.department_id = dept.dept_id;
 
-insert 
- 
-
-
-
-
-
-
-
-
+-- example 
 -- printing the name of teachers with its appropriate departments.
- 
 select teacher.t_name, dept.dept_name from
 teacher join dept
 where 
