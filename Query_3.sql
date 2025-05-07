@@ -92,16 +92,21 @@ select * from teacher;
 -- inner join equal values are in result table
 
 select * from
-teacher join dept
+teacher inner join dept
 where 
 teacher.department_id = dept.dept_id;
-
+	
 -- example 
 -- printing the name of teachers with its appropriate departments.
 select teacher.t_name, dept.dept_name from
-teacher join dept
+teacher inner join  dept
 where 
 teacher.department_id = dept.dept_id;
 
+-- alies name like an object or temporary name
 
+select * from teacher as t
+join dept as d
+where 
+t.department_id = d.dept_id; 
 
