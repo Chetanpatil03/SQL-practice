@@ -76,12 +76,23 @@ alter table stud change column marks stud_marks int not null;
 -- modify the existing column datatype or constraint 
 alter table stud modify stud_marks varchar(25) not null;  
 
+-- truncate is used delete the data of the table
+
+TRUNCATE TABLE stud; 
 
 
+-- joins  inner, left outer,right outer,full outer joins
 
+-- inner join equal values are in result table
 
+ 
+select * from
+teacher join dept
+where 
+teacher.department_id = dept.dept_id;
 
-
+insert 
+ 
 
 
 
