@@ -51,9 +51,18 @@ WHERE
     dept_id = 5;
 
 
-
 DROP table teacher;
 
+create table students(
+	id int primary key,
+    name varchar(20),
+    age int not null    
+);
+
+desc stud;
+
+alter table students rename to stud;
+alter table stud add column marks int not null default 34;
 
 
 
