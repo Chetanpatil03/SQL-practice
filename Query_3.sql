@@ -29,7 +29,7 @@ INSERT INTO teacher (t_name, department_id) VALUES
 ('David', 4),
 ('Eve', 5);
 
-select * from teacher;
+select * from teacher; 
 
 
 
