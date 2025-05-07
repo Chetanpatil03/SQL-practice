@@ -34,7 +34,27 @@ INSERT INTO teacher (t_name, department_id) VALUES
 ('David', 4),
 ('Eve', 5);
 
-select * from teacher; 
+select * from teacher;
+select * from dept;
+
+
+UPDATE dept 
+SET 
+    dept_name = 'Social'
+WHERE
+    dept_name = 'Arts';
+    
+UPDATE dept 
+SET 
+    dept_id = 101
+WHERE
+    dept_id = 5;
+
+
+
+DROP table teacher;
+
+
 
 
 
