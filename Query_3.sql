@@ -9,8 +9,13 @@ create table teacher(
 id int primary key auto_increment,
 t_name varchar(10) not null,
 department_id int references dept(dept_id)
+ON UPDATE CASCADE 
+ON DELETE CASCADE
 );
 
+-- cascade in Foreign key is on update and on delete cascade whene something is deleted or updated in main/parent table it have to reflect to the reference/child table.
+--  cascade is used to create this scenario it automatically refelects the changes into reference table.alter
+-- Syntax : ON UPDATE CASCADE , ON DELETE CASCADE;  
 ALTER TABLE teacher auto_increment = 1;
 
 INSERT INTO dept (dept_id, dept_name) VALUES
