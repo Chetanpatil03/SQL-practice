@@ -107,7 +107,10 @@ select max(marks) from (select * from students where city = "Mumbai") as temp;
 select max(marks) from students where city = "Mumbai";
 
 
+-- Select part : 
 
+select (select max(marks) from students) as max ,name from students;
+-- not much useful
 
 
 
