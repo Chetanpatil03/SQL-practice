@@ -98,7 +98,19 @@ select name,rollno from students where city = "Delhi" and marks in (select max(m
 -- best way / subquery in from part
 
 select max(marks) from (select * from students where city = "Delhi") as temp;
--- alice is must
+-- alice is must (as temp)
+
+-- mumbai students
+select max(marks) from (select * from students where city = "Mumbai") as temp;
+
+-- easiest way to solve this question 
+select max(marks) from students where city = "Mumbai";
+
+
+
+
+
+
     
     
 
