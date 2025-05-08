@@ -152,7 +152,17 @@ Right join dept as d
 on t.department_id = d.dept_id
 where t.department_id is null; 
 
+-- Full exclusive join : which is used to combine the both exclsuive joins
 
 
+select * from teacher as t
+left join dept as d
+on t.department_id = d.dept_id
+where d.dept_id is null
+UNION
+select * from teacher as t
+Right join dept as d
+on t.department_id = d.dept_id
+where t.department_id is null; 
 
 
