@@ -188,5 +188,31 @@ from emp as a
 join emp as b
 on a.id = b.manager_id;
  
+ select * 
+from emp as a 
+join emp as b
+on a.id = b.manager_id;
+
+
+-- Union in SQL : 
+-- it combines the result set of two or more tables
+-- gives unique values
+
+--  ex:
+
+	select emp_name from emp
+    union
+    select emp_name from emp;
+    
+    
+    select emp_name from emp
+    union 
+    select t_name from teacher;
+  
+  
+  -- union all : gives duplicate values 
+  	select emp_name from emp
+    union all
+    select emp_name from emp;
 
 
