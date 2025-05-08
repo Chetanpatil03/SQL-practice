@@ -136,6 +136,22 @@ right join dept as d
 on t.department_id = d.dept_id; 
 
 
+-- Some other types of joins that are not commanly used
+-- Left exclusive and Right exclusive joins
+
+-- Left exclusive : only shows data that are unmatched form left table
+select * from teacher as t
+left join dept as d
+on t.department_id = d.dept_id
+where d.dept_id is null; 
+   
+   
+-- Right exclusive : only shows data that are unmatched form Right table
+select * from teacher as t
+Right join dept as d
+on t.department_id = d.dept_id
+where t.department_id is null; 
+
 
 
 
