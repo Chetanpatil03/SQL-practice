@@ -22,5 +22,21 @@ select * from students;
 --  query inside query (outer query)
 
 -- ex:
+-- que 1: find the student who got higher marks than  class average marks
+
+-- my way :  
+select name,marks from students where marks >= (select avg(marks) from students);
+
+-- her way : 
+-- find average marks
+select avg(marks) from students;
+
+-- names
+select name,marks from students where marks >  87.6667;
+
+-- combined way (dynamic way ) : if it increases or decreases avgerage it doesn't affect
+select name,marks from students where marks > (select avg(marks) from students);
+
+
 
 
