@@ -111,6 +111,27 @@ select max(marks) from students where city = "Mumbai";
 
 select (select max(marks) from students) as max ,name from students;
 -- not much useful
+-- the subqueries are mostly used in where part/location
+
+
+-- views in SQL : virtual tables which is work like sub table of an actual table without affecting the origianl values
+-- can used to restrict the access of the original table and also for data hiding( abstraction).
+
+-- ex : 
+	-- creating
+	create view delhi_stud as 
+    select * from students where city = "Delhi";
+    
+    -- using 
+    select * from delhi_stud;
+
+	create view view1 as 
+    select rollno,name from students;
+    
+    select * from view1;
+    
+    drop view view1;
+
 
 
 
