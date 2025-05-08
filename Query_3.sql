@@ -165,4 +165,28 @@ Right join dept as d
 on t.department_id = d.dept_id
 where t.department_id is null; 
 
+-- Self join : which join same table
+
+create table emp(
+id int primary key,
+emp_name varchar(10),
+manager_id int);
+
+desc emp;
+
+INSERT INTO emp (id, emp_name, manager_id) VALUES (101, 'adam', 103);
+INSERT INTO emp (id, emp_name, manager_id) VALUES (102, 'bob', 104);
+INSERT INTO emp (id, emp_name, manager_id) VALUES (103, 'casey', NULL);
+INSERT INTO emp (id, emp_name, manager_id) VALUES (104, 'donald', 103);
+
+select * from emp;
+
+-- ex
+
+select a.emp_name as manager_id,b.emp_name
+from emp as a 
+join emp as b
+on a.id = b.manager_id;
+ 
+
 
