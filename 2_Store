@@ -1,0 +1,120 @@
+Create database store;
+use store;
+
+create table PRODUCT(
+maker varchar(10) not null,
+model_no varchar(5) primary key,
+type varchar(10) not null check (type in ('PC','Laptop','Printer')));
+
+INSERT INTO PRODUCT VALUES 
+('IBM', 'M001', 'PC'), 
+('Compaq', 'M002', 'Laptop'), 
+('HP', 'M003', 'Printer'), 
+('Dell', 'M004', 'PC'), 
+('Lenovo', 'M005', 'Laptop'), 
+('Epson', 'M006', 'Printer'), 
+('IBM', 'M007', 'PC'), 
+('Compaq', 'M008', 'Laptop'), 
+('HP', 'M009', 'Printer'), 
+('Dell', 'M010', 'PC'),
+('Dell', 'M011', 'PC'); 
+
+select * from PRODUCT;
+
+create table PC(
+model_no varchar(5) primary key,
+Speed DECIMAL(5, 2) NOT NULL, 
+RAM INTEGER NOT NULL, 
+HD DECIMAL(5, 2) NOT NULL, 
+CD VARCHAR(10) NOT NULL, 
+Price DECIMAL(10, 2) NOT NULL,
+foreign key (model_no) references PRODUCT(model_no));
+
+INSERT INTO PC VALUES 
+('M001', 150.00, 256, 20.00, 'CD-ROM', 50000.00), 
+('M004', 200.00, 512, 40.00, 'CD-RW', 70000.00), 
+('M007', 250.00, 1024, 60.00,'CD-RW', 90000.00), 
+('M010', 300.00, 2048, 100.00, 'DVD-ROM', 120000.00),
+('M011', 140.00, 2048, 100.00, 'DVD-ROM', 40000.00);
+
+
+create table LAPTOP(
+model_no VARCHAR(5) PRIMARY KEY, 
+Speed DECIMAL(5, 2) NOT NULL, 
+RAM INTEGER NOT NULL, 
+HD DECIMAL(5, 2) NOT NULL, 
+Price DECIMAL(10, 2) NOT NULL, 
+FOREIGN KEY (model_no) REFERENCES PRODUCT(model_no) 
+); 
+
+INSERT INTO LAPTOP VALUES 
+('M002', 150.00, 256, 20.00, 40000.00), 
+('M005', 200.00, 512, 40.00, 60000.00), 
+('M008', 250.00, 1024, 80.00, 80000.00); 
+
+CREATE TABLE PRINTER ( 
+model_no VARCHAR(5) PRIMARY KEY, 
+Color CHAR(1) NOT NULL CHECK(Color IN ('T', 'F')), 
+Type VARCHAR(10) NOT NULL, 
+Price DECIMAL(10, 2) NOT NULL, 
+FOREIGN KEY (model_no) REFERENCES PRODUCT(model_no) 
+); 
+
+INSERT INTO PRINTER VALUES 
+('M003', 'T', 'Ink-jet', 5000.00), 
+('M006', 'F', 'Laser', 10000.00), 
+('M009', 'T', 'Dot-matrix', 3000.00); 
+
+select * from PRODUCT;
+select * from LAPTOP;
+select * from PC;
+select * from PRINTER;
+
+--Query 1 : Find PC models having a speed of at least 150 MHz 
+SELECT * FROM PC;
+select * from PC where Speed >=150;
+
+--Query 2 : Find those manufacturers that sell Laptops, but not PC's.
+SELECT * FROM PRODUCT;
+select distinct Maker from PRODUCT 
+WHERE type = 'Laptop' And type !='PC';
+
+--Query 3 :  Write a procedure to find the manufacturer who has produced the most expensive laptop. 
+
+create procedure find_maker as 
+begin
+ 
+select p.maker,l.Price from PRODUCT AS p join LAPTOP AS l
+on p.model_no = l.model_no
+order by l.Price desc;
+
+end;
+
+find_maker;
+
+select maker from PRODUCT where 
+model_no in (select model_no from LAPTOP where Price in 
+(select MAX(Price) from LAPTOP));
+
+--Query 4 : Find the different types of printers produced by Epson. 
+select p1.model_no,p1.Color,p1.Type,p1.Price, p2.maker,p2.type
+from PRINTER as p1
+join PRODUCT as p2 
+on p1.model_no = p2.model_no
+where p2.maker = 'Epson';
+
+--Query 5 :  Find those hard disk sizes which occur in two or more PCs. 
+select HD, COUNT(*) as Frequency 
+from PC group by HD having COUNT(*) >=2;
+
+
+--Query 6 :  Find the manufacturers of color printers. 
+select p1.maker, p1.model_no, p2.Color from PRODUCT as p1
+join PRINTER as p2
+on p1.model_no = p2.model_no
+where p2.Color = 'T';
+
+-- Query 7:  Find the laptops whose speed is slower than that of any PC. 
+Select top 1 * from LAPTOP order by Speed asc;
+select * from LAPTOP;
+
