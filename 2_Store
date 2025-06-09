@@ -118,3 +118,63 @@ where p2.Color = 'T';
 Select top 1 * from LAPTOP order by Speed asc;
 select * from LAPTOP;
 
+--triggers : 
+
+--Query 8:  Write a trigger on LAPTOP table such that the price should not less than 30000 
+
+create trigger price_trg on LAPTOP 
+after insert,update as 
+Begin
+	if exists(select 1 from inserted where Price < 30000)
+	begin 
+		raiserror('Laptop price should be more than 30000',16,1);
+		rollback;
+	end;
+end;
+
+select * from LAPTOP;
+update LAPTOP set Price = 20000 where model_no = 'M002';
+
+--Query 9:  Write a trigger on LAPTOP table such that the minimum speed should be 120 MHz
+
+create trigger speed_trg on LAPTOP 
+after insert,update as 
+Begin
+	if exists(select 1 from inserted where Speed < 120)
+	begin 
+		raiserror('Laptop Speed should be more than 120',16,1);
+		rollback;
+	end;
+end;
+
+select * from LAPTOP;
+update LAPTOP set Speed = 100 where model_no = 'M002';
+
+--Query 10:  write a trigger on PC & LAPTOP table such that the hard disk size should be greater than 20 GB. 
+--laptop
+create trigger Hd_size_trg on LAPTOP
+after insert,update as 
+Begin
+	if exists(select 1 from inserted where HD < 20)
+	begin 
+		raiserror('Laptop HD size should be more than 20 GB',16,1);
+		rollback;
+	end;
+end;
+
+select * from LAPTOP;
+update LAPTOP set HD = 10.00 where model_no = 'M002';
+
+-- PC
+create trigger Hd_size_trrg on PC
+after insert,update as 
+Begin
+	if exists(select 1 from inserted where HD < 20)
+	begin 
+		raiserror('PC HD size should be more than 20 GB',16,1);
+		rollback;
+	end;
+end;
+
+select * from PC;
+update PC set HD = 10.00 where model_no = 'M001';
