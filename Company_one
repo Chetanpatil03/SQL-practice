@@ -1,0 +1,117 @@
+create database company;
+use company;
+
+create table SUPPLIER(
+Sno varchar(5) primary key check( Sno like 'S%'),
+Sname varchar(15) not null,
+addr varchar(20) not null,
+city varchar(15) not null check(city in ('London', 'Paris', 'Rome', 'New York', 'Amsterdam')),
+);
+
+create table PARTS(
+Pno varchar(5) primary key,
+Pname varchar(10) not null,
+Color varchar(10) not null,
+Weightt varchar(5) not null,
+price int not null);
+
+alter table PARTS alter column Weightt decimal not null;
+
+create table PROJECT(
+Jno varchar(5) primary key,
+Jname varchar(10) not null,
+city varchar(15) not null check(city in ('London', 'Paris', 'Rome', 'New York', 'Amsterdam')),
+);
+
+alter table PROJECT alter column Jname varchar(20) not null;
+
+create table SPJ(
+id int primary key,
+Sno varchar(5) not null,
+Pno varchar(5) not null,
+Jno varchar(5) not null,
+Qty int not null,
+Foreign key(Sno) references SUPPLIER(Sno),
+Foreign key(Pno) references PARTS(Pno),
+Foreign key(Jno) references PROJECT(Jno));
+
+INSERT INTO SUPPLIER VALUES 
+('S001', 'Alpha Supplies', '123 Alpha St', 'London'), 
+('S002', 'Beta Traders', '456 Beta St', 'Paris'), 
+('S003', 'Gamma Goods', '789 Gamma Blvd', 'Rome'), 
+('S004', 'Delta Corp', '111 Delta Ln', 'New York'), 
+('S005', 'Epsilon LLC', '222 Epsilon Rd', 'Amsterdam'), 
+('S006', 'Zeta Ltd.', '333 Zeta Pl', 'London'), 
+('S007', 'Eta Supplies', '444 Eta St', 'Paris'), 
+('S008', 'Theta Inc.', '555 Theta Dr', 'Rome'), 
+('S009', 'Iota Partners', '666 Iota Blvd', 'New York'), 
+('S010', 'Kappa Co.', '777 Kappa Way', 'Amsterdam');
+
+INSERT INTO PARTS VALUES 
+('P001', 'Bolt', 'Red', 1.25, 2.50), 
+('P002', 'Nut', 'Blue', 0.75, 1.25), 
+('P003', 'Screw', 'Green', 0.50, 1.00), 
+('P004', 'Washer', 'Red', 0.20, 0.80), 
+('P005', 'Pin', 'Yellow', 0.30, 0.60), 
+('P006', 'Bracket', 'Black', 2.00, 4.00), 
+('P007', 'Clamp', 'Silver', 3.00, 5.50), 
+('P008', 'Rod', 'Grey', 5.00, 6.25), 
+('P009', 'Pipe', 'White', 10.00, 8.00), 
+('P010', 'Valve', 'Orange', 1.10, 7.00);
+
+INSERT INTO PROJECT VALUES 
+('J001', 'Bridge Build', 'London'), 
+('J002', 'Road Expansion', 'Paris'), 
+('J003', 'Metro Construction', 'Rome'), 
+('J004', 'Mall Development', 'New York'), 
+('J005', 'Tunnel Project', 'Amsterdam'), 
+('J006', 'Park Renovation', 'Paris'), 
+('J007', 'Hospital Build', 'London'), 
+('J008', 'Airport Extension', 'Rome'), 
+('J009', 'Harbor Setup', 'New York'), 
+('J010', 'Water Dam', 'Paris'); 
+
+INSERT INTO SPJ VALUES 
+(1,'S001', 'P001', 'J001', 100), 
+(2,'S002', 'P002', 'J002', 200), 
+(3,'S003', 'P003', 'J003', 150), 
+(4,'S004', 'P004', 'J004', 80), 
+(5,'S005', 'P005', 'J005', 120), 
+(6,'S001', 'P006', 'J001', 60), 
+(7,'S002', 'P007', 'J002', 90), 
+(8,'S006', 'P008', 'J006', 70), 
+(9,'S007', 'P009', 'J010', 110), 
+(10,'S008', 'P010', 'J003', 100), 
+(11,'S009', 'P001', 'J007', 50), 
+(12,'S010', 'P002', 'J006', 90); 
+
+select * from PARTS;
+select * from SUPPLIER;
+select * from PROJECT;
+select * from SPJ;
+
+-- Query 1 : Find all the projects which are provided 3 or more parts.
+select * from PROJECT 
+WHERE Jno IN (select Jno from SPJ where Qty >= 3);
+
+-- Query 3 :  Find full details of all projects in London. 
+select * from PROJECT 
+where city = 'London'; 
+
+-- Query 4 :  Write a procedure for calculating the total sales of all the parts which are provided to projects in Paris city. 
+
+create procedure total_sales 
+AS 
+Begin
+	declare @sales int;
+	select @sales = sum(p.price * s.Qty) from SPJ as s 
+	join PROJECT as j on j.Jno = s.Jno
+	join PARTS as p on p.Pno = s.Pno
+	where j.city = 'Paris';
+	
+	print 'Total Sales in paris city : ';
+	print @sales;
+	
+end;
+
+total_sales;
