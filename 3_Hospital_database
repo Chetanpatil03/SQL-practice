@@ -1,0 +1,310 @@
+create database hospital;
+use hospital;
+
+create table DOCTOR(
+Did INT primary key,
+Dname varchar(10) not null,
+Daddress varchar(20) not null,
+qualification varchar(10) not null);
+
+insert into DOCTOR values
+(1, 'Dr. Sharma', 'Delhi', 'MBBS'), 
+(2, 'Dr. Patel', 'Mumbai', 'MD'), 
+(3, 'Dr. Khan', 'Bangalore', 'MBBS'), 
+(4, 'Dr. Mehta', 'Chennai', 'MD'), 
+(5, 'Dr. Roy', 'Kolkata', 'MS'), 
+(6, 'Dr. Iyer', 'Hyderabad', 'MBBS'), 
+(7, 'Dr. Das', 'Pune', 'MD'), 
+(8, 'Dr. Gupta', 'Ahmedabad', 'MBBS'), 
+(9, 'Dr. Verma', 'Jaipur', 'MD'), 
+(10, 'Dr. Reddy', 'Lucknow', 'MS'); 
+
+create table PATIENTMASTER(
+Pcode int primary key,
+Pname varchar(10) not null,
+Padd varchar(20) not null,
+age int not null,
+gender char check(gender in ('M','F')) not null,
+bloodgroup varchar(5) not null,
+Did int not null,
+Foreign key(Did) references DOCTOR(Did));
+
+INSERT INTO PATIENTMASTER VALUES 
+(101, 'Ravi', 'Delhi', 25, 'M', 'A', 1), 
+(102, 'Sita', 'Mumbai', 30, 'F', 'B', 2), 
+(103, 'Aman', 'Chennai', 28, 'M', 'O', 3), 
+(104, 'Neha', 'Pune', 22, 'F', 'AB', 4), 
+(105, 'Vijay', 'Hyderabad', 35, 'M', 'A', 5), 
+(106, 'Priya', 'Bangalore', 40, 'F', 'O', 6), 
+(107, 'Anil', 'Ahmedabad', 31, 'M', 'B', 7), 
+(108, 'Kavita', 'Kolkata', 29, 'F', 'AB', 8), 
+(109, 'Sunil', 'Delhi', 50, 'M', 'A', 9), 
+(110, 'Divya', 'Lucknow', 33, 'F', 'O', 10);
+
+create table ADMITTEDPATIENT(
+Pcode int not null,
+Entry_date DATE NOT NULL, 
+Discharge_date DATE NOT NULL, 
+wardno INT CHECK (wardno < 6) NOT NULL, 
+disease VARCHAR(50) NOT NULL, 
+FOREIGN KEY (Pcode) REFERENCES PATIENTMASTER(Pcode));
+
+INSERT INTO ADMITTEDPATIENT VALUES 
+(101, '2012-03-01', '2012-03-05', 3, 'Flu'), 
+(102, '2012-03-10', '2012-03-15', 2, 'Malaria'), 
+(103, '2012-03-12', '2012-03-18', 3, 'Typhoid'), 
+(104, '2012-02-20', '2012-03-03', 1, 'COVID'), 
+(105, '2012-03-04', '2012-03-22', 4, 'Fracture'), 
+(106, '2012-03-08', '2012-03-24', 3, 'Asthma'), 
+(107, '2012-03-10', '2012-03-20', 1, 'Diabetes'), 
+(108, '2012-03-02', '2012-03-26', 2, 'Cancer'), 
+(109, '2012-03-01', '2012-03-07', 3, 'Flu'), 
+(110, '2012-03-13', '2012-03-25', 5, 'Cold'),
+(111, '2012-03-13', '2012-03-25', 3, 'blood cancer'); 
+
+
+
+--Query 1 :   Find the details of doctors who are treating the patient of ward no 3. 
+
+select d.Did,d.Dname,d.Daddress,d.qualification,p.Pcode,p.Pname,a.wardno from DOCTOR as d
+join PATIENTMASTER as p on p.Did = d.Did
+join ADMITTEDPATIENT as a on a.Pcode = p.Pcode
+where wardno = 3;
+
+--Query 2 :   Find the details of patient who are discharge within the period 03/03/12 to 25/03/12 
+select * from PATIENTMASTER as p
+join ADMITTEDPATIENT as a
+on a.Pcode = p.Pcode
+where Discharge_date between '2012/03/03' and '2012/03/25';
+
+select * from ADMITTEDPATIENT;
+
+--Query 3 : Write a trigger on PATIENTMASTER table such that the blood group should be A, B, AB or 0.
+
+create trigger bloodgrp_trg on PATIENTMASTER 
+after insert,update as
+begin 
+	if not exists(select 1 from inserted where bloodgroup in('A','B','AB','A'))
+	begin
+		raiserror('The blood group should be in A,B,AB or O',16,2);
+		rollback;
+	end;
+end;
+
+select * from PATIENTMASTER;
+update PATIENTMASTER set bloodgroup = 'C' where Pcode=101;
+
+--Query 4 : Write a procedure on ADMIFTEDPATIENT table such as to calculate bill of all discharged patients. The charges per day for a ward is Ward_no. * 100. e.g. For ward_no 3 charges/day are 300Rs. 
+
+create procedure bill_pt 
+@patient_id int
+AS 
+Begin
+	declare @DayDiff int, @bill int, @wardno int ;
+
+	select
+	@DayDiff = datediff(day, Entry_date,Discharge_date),
+	@wardno = a.wardno
+	from ADMITTEDPATIENT as a where Pcode = @patient_id;
+
+	set @bill = @DayDiff * (@wardno * 100);
+
+	print 'The bill amount is ' + cast(@bill as varchar(10));
+end;
+
+
+bill_pt @patient_id = 101 ;
+select * from ADMITTEDPATIENT;
+
+
+--Query 5 :  Find the details of the doctors who are treating the patients of ward no 3 & display the result along with patient name & disease. 
+
+select d.Did,d.Dname, p.Pcode, p.Pname, a.disease,a.wardno 
+from DOCTOR as d 
+join PATIENTMASTER as p on p.Did = d.Did
+join ADMITTEDPATIENT as a on a.Pcode = p.Pcode
+where a.wardno = 3;
+
+
+--Query 6:  Find the name of the disease by which maximum patients are suffering.
+
+select top 1 disease,COUNT(*) as patientCount from ADMITTEDPATIENT group by disease order by patientCount desc;
+
+--Query 7 :  Write a trigger on ADMITTEDPATIENT table such that the wardno value should be between 1-5. 
+
+create trigger wardno on ADMITTEDPATIENT
+after insert,update as 
+Begin
+	if not exists(select 1 from inserted where wardno between 1 and 6)
+	begin
+		raiserror('In this table the ward number should be in the range of 1 - 5',16,1);
+		rollback;
+	end;
+end;
+
+select * from ADMITTEDPATIENT;
+update ADMITTEDPATIENT set wardno = 9 where Pcode = 106;
+
+--Query 8 :  Write a procedure to give the details of patients who are admitted in the hospital for more than 5 days. 
+
+create procedure details_pt
+as
+begin
+	select * ,datediff(day,Entry_date,Discharge_date) as Day_admitted from ADMITTEDPATIENT where   datediff(day,Entry_date,Discharge_date) >= 5;
+end;
+
+details_pt;
+
+--Query 9 :  Find details of the patients who are treated by M.B.B.S. doctor
+
+select * from DOCTOR;
+Select * from ADMITTEDPATIENT;
+select * from PATIENTMASTER;
+
+select * from PATIENTMASTER as p 
+join DOCTOR as d
+on p.Did = d.Did
+where d.qualification = 'MBBS';
+
+-- Query 10:  Find the details of patient who is suffered from blood cancer having age less than 50 years & blood group is A.
+
+select p.Pcode, p.Pname, p.bloodgroup, p.age, a.disease from PATIENTMASTER as  p 
+join ADMITTEDPATIENT as a
+on p.Pcode = a.Pcode 
+where p.age < 50 and p.bloodgroup = 'A' and a.disease = 'blood cancer';
+
+select * from PATIENTMASTER;
+select * from ADMITTEDPATIENT;
+select * from DOCTOR;
+
+--Query 11 :  write a procedure on ADMITTEDPATIENT table such as to calculate the bill of all patients. (bill no of days * 600) 
+
+create procedure calcu_bill 
+@patient_id int
+as
+begin 
+	declare @bill int, @daydiff int;
+
+	select
+	@daydiff = DATEDIFF(DAY,Entry_date,Discharge_date)
+	from ADMITTEDPATIENT where Pcode =  @patient_id;
+
+	set @bill = @daydiff * 600;
+
+	print 'The total bill is : ' + cast(@bill as varchar(10));
+
+	--select *, @bill as total_Amount from ADMITTEDPATIENT; 
+end;
+
+drop procedure calcu_bill;
+
+calcu_bill @patient_id = 101;
+select * from ADMITTEDPATIENT;
+
+--Query 12 :  Find name of the doctor who are treating the male patients suffering from disease brain tumor & having age less than 40 years
+
+select d.Did,d.Dname,p.Pcode,p.Pname,p.age,p.gender,a.disease,a.wardno
+from DOCTOR as d 
+join PATIENTMASTER as p on d.Did = p.Did
+join ADMITTEDPATIENT as a on p.Pcode = a.Pcode 
+where a.disease = 'brain tumor' and p.gender = 'M' and p.age <40;
+
+--Query 13:  write a procedure on ADMITTEDPATIENT table such as to calculate the bill of all patients who are discharged on 30-3-2008 . (bill no of days * 500) 
+
+create procedure bill_cal
+as 
+begin
+	declare @bill int, @daydiff int;
+	
+	select 
+	@daydiff = DATEDIFF(day,Entry_date,Discharge_date)
+	from ADMITTEDPATIENT 
+	where Discharge_date = '2008/03/30';
+
+	set @bill = @daydiff * 500;
+
+	print 'Bill is : ' + cast(@bill as varchar(10));
+end;
+
+drop procedure bill_cal;
+bill_cal;
+
+select * from ADMITTEDPATIENT;
+
+--Query 14 :  Find the details of patient who are admitted within the period 03/03/08 to 25/ 03/08. 
+
+select p.Pcode,p.Pname,p.gender,p.age , a.disease,a.wardno,a.Entry_date
+from PATIENTMASTER as p
+join ADMITTEDPATIENT as a
+on p.Pcode = a.Pcode
+where a.Entry_date between '2008/03/03' and '2008/03/25' order by Entry_date desc ;
+
+-- Query 15:  Find the names of doctors who are treating Jalf_zaon patients.
+
+select d.Did,d.Dname, p.Pname,p.Padd from  DOCTOR as d
+join PATIENTMASTER as p
+on d.Did = p.Did
+where p.Pname = ' Jalf_zaon';
+
+--Query 16 :  Write a trigger on DOCTOR table such that the specialization should be: - M.B.B.S. / B.A.M.S / M.S.
+
+create trigger doct_special on DOCTOR
+after insert,update as 
+begin
+		if not exists(select 1 from inserted where qualification in ('MBBS','BAMS','MS'))
+		BEGIN
+			raiserror('the specialization of doctor should in  M.B.B.S. / B.A.M.S / M.S.',16,1);
+			rollback;
+		end
+	end;
+
+update DOCTOR set qualification = 'bhms' where Did = 5;
+
+select * from DOCTOR;
+
+-- Query 17 :  Find the name of doctor who is treating maximum number of patients.
+
+select d.Did,d.Dname from DOCTOR as d 
+where d.Did in(select top 1 Did from PATIENTMASTER  group by Did order by count(*) desc);
+
+--Query 18 :  Write a procedure to give the details of patients who are admitted in the hospital for more than 15 days
+
+create procedure patient_details 
+as
+begin
+	declare @dayDiff int ;
+
+	select p.Pcode,p.Pname,p.gender,p.age,p.bloodgroup, a.disease,a.Entry_date,a.wardno,
+	datediff(day, a.Entry_date,a.Discharge_date) as Days_addmitted
+	from PATIENTMASTER as p
+	join ADMITTEDPATIENT as a
+	on a.Pcode = p.Pcode
+	where datediff(day, a.Entry_date,a.Discharge_date) > 15;
+
+end;
+
+patient_details;
+
+--Query 19 :  Create a view on DOCTOR & PATIENTMASTER tables. Update details of the patients who are treated by B.A.-M.S. doctors to M.B.B.S doctor.
+
+create view patients_details as
+Select d.Did,d.Dname,p.Pcode,p.Pname,p.gender,p.age from PATIENTMASTER as p 
+join DOCTOR as d
+on p.Did = d.Did;
+
+select * from patients_details;
+
+--updating details BAMS -> MBBS
+
+select * from PATIENTMASTER where Did in (select Did from DOCTOR where qualification = 'BAMS');
+
+update PATIENTMASTER set Did = (select top 1 Did from PATIENTMASTER where Did in (select Did from DOCTOR where qualification = 'MBBS')) 
+where Did in (select Did from PATIENTMASTER where Did in (select Did from DOCTOR where qualification = 'BAMS'));
+
+
+--Query 20 :  Find details of the patients who are treated by M.S. doctors
+
+select  p.* from PATIENTMASTER as p
+join DOCTOR as d 
+on p.Did = d.Did
+where d.qualification = 'MS';
