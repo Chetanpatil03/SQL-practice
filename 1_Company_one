@@ -12,18 +12,17 @@ create table PARTS(
 Pno varchar(5) primary key,
 Pname varchar(10) not null,
 Color varchar(10) not null,
-Weightt varchar(5) not null,
+Weightt decimal(5,2) not null,
 price int not null);
 
-alter table PARTS alter column Weightt decimal not null;
 
 create table PROJECT(
 Jno varchar(5) primary key,
-Jname varchar(10) not null,
+Jname varchar(20) not null,
 city varchar(15) not null check(city in ('London', 'Paris', 'Rome', 'New York', 'Amsterdam')),
 );
 
-alter table PROJECT alter column Jname varchar(20) not null;
+
 
 create table SPJ(
 id int primary key,
