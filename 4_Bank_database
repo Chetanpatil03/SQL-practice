@@ -1,0 +1,259 @@
+create database Bank;
+use Bank;
+
+CREATE TABLE ACCOUNT ( 
+accno INT PRIMARY KEY CHECK (accno < 1000), 
+open_date DATE NOT NULL, 
+acctype CHAR(1) NOT NULL CHECK (acctype IN ('P', 'J')), 
+balance MONEY NOT NULL 
+); 
+
+insert into ACCOUNT VALUES
+(101, '2024-01-01', 'P', 120000), 
+(102, '2024-01-10', 'J', 85000), 
+(103, '2024-02-05', 'P', 105000), 
+(104, '2024-02-20', 'P', 60000), 
+(105, '2024-03-01', 'J', 50000), 
+(106, '2024-03-10', 'P', 30000), 
+(107, '2024-03-15', 'J', 150000), 
+(108, '2024-04-01', 'P', 95000), 
+(109, '2024-04-05', 'P', 200000), 
+(110, '2012-03-26', 'p', 400000);
+
+CREATE TABLE CUSTOMER ( 
+cust_id INT PRIMARY KEY, 
+name VARCHAR(100) NOT NULL, 
+address VARCHAR(200) NOT NULL, 
+accno INT NOT NULL, 
+FOREIGN KEY (accno) REFERENCES ACCOUNT(accno) 
+); 
+
+INSERT INTO CUSTOMER VALUES 
+(1, 'Ravi Kumar', 'Delhi', 101), 
+(2, 'Neha Sharma', 'Mumbai', 102), 
+(3, 'Arun Mehta', 'Chennai', 103), 
+(4, 'Sita Verma', 'Pune', 104), 
+(5, 'Anil Gupta', 'Hyderabad', 105), 
+(6, 'Priya Das', 'Kolkata', 106), 
+(7, 'Kiran Roy', 'Lucknow', 107), 
+(8, 'Nidhi Joshi', 'Bangalore', 108), 
+(9, 'Amit Patel', 'Ahmedabad', 109), 
+(10, 'Divya Iyer', 'Chandigarh', 110); 
+
+
+CREATE TABLE TRANSACTIONN( 
+trans_id INT PRIMARY KEY, 
+trans_date DATE NOT NULL, 
+accno INT NOT NULL, 
+trans_type CHAR(1) NOT NULL CHECK (trans_type IN ('C', 'D')), 
+amount MONEY NOT NULL, 
+FOREIGN KEY (accno) REFERENCES ACCOUNT(accno)
+); 
+
+INSERT INTO TRANSACTIONN VALUES
+(1, '2012-03-25', 101, 'C', 25000), 
+(2, '2012-03-26', 102, 'C', 10000), 
+(3, '2012-03-27', 103, 'C', 5000), 
+(4, '2012-03-28', 104, 'D', 2000), 
+(5, '2012-03-24', 105, 'C', 3000), 
+(6, '2012-03-25', 106, 'D', 1500), 
+(7, '2012-03-26', 107, 'C', 6000), 
+(8, '2012-03-27', 108, 'D', 2500), 
+(9, '2012-03-28', 109, 'C', 8000), 
+(10, '2012-03-25', 110, 'C', 12000); 
+
+--Query 1 : Find the details of customers whose minimum balance is 1 lakh. 
+
+select c.*, a.balance from CUSTOMER as c 
+join ACCOUNT as a 
+on a.accno = c.accno
+where a.balance <=100000;
+
+--Query 2 : • Find the details of amount credited within the period 25-3-2012 to 28-3- 2012 
+
+select * from TRANSACTIONN
+where trans_type = 'C' and trans_date between '2012-03-25' and '2012-03-28';
+
+--Query 3 :  Write a trigger on TRANSACTION table to calculate current balance of account on which transaction is made.
+
+create trigger account_balance on TRANSACTIONN
+after insert as 
+begin 
+	declare @total_balance int, @account_number int, @amount money;
+
+	if exists (select 1 from inserted where trans_type = 'C')
+	begin
+		select 
+		@account_number = i.accno,
+		@amount = i.amount
+		from inserted as i;
+
+		select 
+		@total_balance = (a.balance + @amount )
+		from ACCOUNT as a where accno = @account_number;
+	end;
+
+	if exists (select 1 from inserted where trans_type = 'D')
+	begin
+		select 
+		@account_number = i.accno,
+		@amount = i.amount
+		from inserted as i;
+
+		select 
+		@total_balance = (a.balance - @amount )
+		from ACCOUNT as a where accno = @account_number;
+	end;
+
+
+	print 'Account number : ' + cast (@account_number as varchar(20));
+	print 'Total Balance : ' + cast(@total_balance as varchar(20));
+end;
+
+--to check trigger
+insert into TRANSACTIONN values
+(11, '2024-03-25', 110, 'C', 12000);
+
+disable trigger account_balance on TRANSACTIONN;
+
+--Query 4 : Find the details of customers who have personal accounts & balance is less than 2 lakhs. 
+select c.* , a.acctype , a.balance from CUSTOMER as c
+join ACCOUNT as a
+on a.accno = c.accno
+where a.acctype = 'P' and a.balance <= 200000;
+
+--Query 5 :  Find the details of customers who have joint accounts.
+select c.* , a.acctype , a.balance from CUSTOMER as c
+join ACCOUNT as a
+on a.accno = c.accno
+where a.acctype = 'J';
+
+--Query 6 : Find the details of all transactions performed on account number 101. Also specify the name/names of cutomers who owns that account. 
+
+select t.*,c.name, a.acctype from TRANSACTIONN as t 
+join CUSTOMER as c on c.accno = t.accno
+join ACCOUNT as a on a.accno = t.accno
+where t.accno = 101;
+
+--Query 7 :  Write a trigger on ACCOUNT table such that if balance is less than 300 then customer should not withdraw the money. 
+
+create trigger make_change on TRANSACTIONN 
+after insert,update as
+begin 
+	declare @amount money, @account_number int ;
+
+	if exists (select 1 from inserted where trans_type = 'C')
+	begin
+		select 
+		@amount = i.amount,
+		@account_number = i.accno
+		from inserted as i;
+
+		update ACCOUNT set balance = balance + @amount 
+		where accno = @account_number;
+
+		print 'Amount Credited : ' + cast(@amount as varchar(20));
+		print 'To account : ' +  cast(@account_number as varchar(20));
+	end;
+
+	if exists (select 1 from inserted where trans_type = 'D')
+	begin
+		select 
+		@amount = i.amount,
+		@account_number = i.accno
+		from inserted as i;
+
+		update ACCOUNT set balance = balance - @amount 
+		where accno = @account_number;
+
+		print 'Amount Debited : ' + cast(@amount as varchar(20));
+		print 'From account : ' +  cast(@account_number as varchar(20));
+	end;
+end;
+
+--disable trigger
+disable trigger make_change on TRANSACTIONN;
+
+create trigger min_bal on ACCOUNT
+after insert,update as
+begin
+	if exists (select 1 from inserted where balance < 300)
+	begin 
+		raiserror('The balance cannot be less than 300 because it is default limit of the bank',16,1);
+		rollback;
+	end;
+end;
+
+
+
+select * from ACCOUNT;
+update ACCOUNT set balance = 250 where accno = 101;
+
+select * from TRANSACTIONN;
+
+insert into TRANSACTIONN values
+(13, '2024-03-25', 102, 'C', 12000); 
+
+--Query 8 :  Write a procedure on ACCOUNT & TRANSACTION table such that as user enters new transaction the balance is, updated in ACCOUNT table.
+
+create procedure auto_update
+@transaction_id int
+as 
+begin 
+declare @amount money, @account_number int ,@transaction_type char, @current_bal money;
+
+		select 
+		@amount = t.amount,
+		@account_number = t.accno,
+		@transaction_type = t.trans_type
+		from TRANSACTIONN as t where trans_id = @transaction_id;
+
+		if (@transaction_type = 'C')
+		begin
+			update ACCOUNT set balance = balance + @amount 
+			where accno = @account_number;
+
+			print 'Amount Credited : ' + cast(@amount as varchar(20));
+			print 'To account : ' +  cast(@account_number as varchar(20));
+		end;
+
+		if (@transaction_type = 'D')
+		begin
+			update ACCOUNT set balance = balance - @amount 
+			where accno = @account_number;
+
+			print 'Amount Debited : ' + cast(@amount as varchar(20));
+			print 'From account : ' +  cast(@account_number as varchar(20));
+		end;
+
+		select @current_bal = a.balance
+		from ACCOUNT as a where a.accno = @account_number;
+
+		print 'Current balance : ' + cast(@current_bal as varchar(20)); 
+end;
+
+select * from ACCOUNT;
+select * from TRANSACTIONN;
+
+insert into TRANSACTIONN values
+(14, '2024-03-25', 102, 'C', 3000);
+
+auto_update @transaction_id = 14;
+
+
+--Query 9 :  Write a procedure on ACCOUNT table to calculate interest on current balance from open_date to today's date. (Take interest rate from user). 
+
+create procedure interest_rate_calculate
+@rate decimal(6,4)
+as
+begin 
+	declare @account_number int, @total money,@days int, @final_interest money;
+
+	select 
+	@days = datediff(day,a.open_date,'2024-12-31'),
+	@account_number = a.accno	
+	from ACCOUNT as a;
+
+	select *, datediff(day,open_date,'2024-12-31') as Days_joining from ACCOUNT;
+
+
