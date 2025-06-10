@@ -1,0 +1,33 @@
+create trigger make_change on TRANSACTIONN 
+after insert,update as
+begin 
+	declare @amount money, @account_number int ;
+
+	if exists (select 1 from inserted where trans_type = 'C')
+	begin
+		select 
+		@amount = i.amount,
+		@account_number = i.accno
+		from inserted as i;
+
+		update ACCOUNT set balance = balance + @amount 
+		where accno = @account_number;
+
+		print 'Amount Credited : ' + cast(@amount as varchar(20));
+		print 'To account : ' +  cast(@account_number as varchar(20));
+	end;
+
+	if exists (select 1 from inserted where trans_type = 'D')
+	begin
+		select 
+		@amount = i.amount,
+		@account_number = i.accno
+		from inserted as i;
+
+		update ACCOUNT set balance = balance - @amount 
+		where accno = @account_number;
+
+		print 'Amount Debited : ' + cast(@amount as varchar(20));
+		print 'From account : ' +  cast(@account_number as varchar(20));
+	end;
+end;
