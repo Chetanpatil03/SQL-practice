@@ -199,3 +199,25 @@ end;
 update PRINTER set Type = 'Laser' ,Color = 'F' where model_no = 'M006' ;
 
 select * from PRINTER;
+
+--cursor demonstration
+
+--Query 12 : Demonstrate the use of cursor using PRODUCT table. 
+
+declare @maker varchar(10), @modelno varchar(10), @type varchar(10)
+
+declare product_info cursor for
+select maker,model_no,type from PRODUCT;
+
+open product_info;
+
+fetch next from product_info into @maker,@modelno,@type;
+
+while @@FETCH_STATUS = 0
+	begin 
+	print 'Maker : ' + @maker + '  Model no : ' + @modelno + ' Type : '+@type;
+	fetch next from product_info into @maker,@modelno,@type;
+	end;
+
+CLOSE product_info; 
+DEALLOCATE product_info;
