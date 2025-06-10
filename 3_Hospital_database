@@ -150,7 +150,10 @@ update ADMITTEDPATIENT set wardno = 9 where Pcode = 106;
 create procedure details_pt
 as
 begin
-	select * ,datediff(day,Entry_date,Discharge_date) as Day_admitted from ADMITTEDPATIENT where   datediff(day,Entry_date,Discharge_date) >= 5;
+	select * ,
+	datediff(day,Entry_date,Discharge_date) as Day_admitted 
+	from ADMITTEDPATIENT 
+	where datediff(day,Entry_date,Discharge_date) >= 5;
 end;
 
 details_pt;
@@ -196,7 +199,6 @@ begin
 	--select *, @bill as total_Amount from ADMITTEDPATIENT; 
 end;
 
-drop procedure calcu_bill;
 
 calcu_bill @patient_id = 101;
 select * from ADMITTEDPATIENT;
@@ -226,12 +228,11 @@ begin
 	print 'Bill is : ' + cast(@bill as varchar(10));
 end;
 
-drop procedure bill_cal;
 bill_cal;
 
 select * from ADMITTEDPATIENT;
 
---Query 14 :  Find the details of patient who are admitted within the period 03/03/08 to 25/ 03/08. 
+--Query 14 :  Find the details of patient who are admitted within the period 03/03/08 to 25/03/08. 
 
 select p.Pcode,p.Pname,p.gender,p.age , a.disease,a.wardno,a.Entry_date
 from PATIENTMASTER as p
