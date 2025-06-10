@@ -59,10 +59,8 @@ INSERT INTO DEPT (dname, dnum, dlocation) VALUES
 
 
 
-
 ALTER TABLE DEPT add  mgrssn CHAR(9) foreign key references EMPLOYEE(ssn);
 select * from DEPT;
-
 
 
 CREATE TABLE PROJECT ( 
@@ -120,7 +118,7 @@ where w.pno in (101,102,103);
 select p.pno,p.pname, d.dname from PROJECT as p
 join DEPT as d on d.dnum = p.dnumber
 join EMPLOYEE as e on e.ssn = d.mgrssn
-where e.lname = 'Doe';
+where e.lname = 'sonar';
 
 select * from DEPT;
 
@@ -150,7 +148,6 @@ join EMPLOYEE as e2 on e1.ssn = e2.superssn;
 
 
 --Query 5:  For each dept, Find the deptno, the no. of employees in the dept & their average salary. 
-
 
 select e.dno as Department_number, d.dname, COUNT(*) as Totalemp, AVG(salary) 
 from  EMPLOYEE as e
@@ -182,8 +179,6 @@ select * from details;
 
 create procedure promotion as
 begin
-	declare  @emp_id varchar(10);
-
 	select 
 	e.fname +' '+e.lname as Employee_name,
 	COUNT(w.Pno) as Project_worked
