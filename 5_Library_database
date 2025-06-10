@@ -1,0 +1,196 @@
+create database Library_one;
+use Library_one;
+
+CREATE TABLE BOOKMASTER ( 
+bid INT PRIMARY KEY, 
+title VARCHAR(100) NOT NULL, 
+author VARCHAR(100) NOT NULL, 
+price DECIMAL(10, 2) NOT NULL 
+); 
+
+insert into BOOKMASTER values
+(1, 'Database Systems', 'Elmasri', 500), 
+(2, 'Operating Systems', 'Galvin', 600), 
+(3, 'Networking Basics', 'Tanenbaum', 450), 
+(4, 'C Programming', 'Dennis Ritchie', 300), 
+(5, 'Python Programming', 'Guido van Rossum', 550), 
+(6, 'Java Complete Ref', 'Schildt', 700), 
+(7, 'Web Technologies', 'Achyut Godbole', 400), 
+(8, 'AI Basics', 'Stuart Russell', 800), 
+(9, 'ML Concepts', 'Andrew Ng', 900), 
+(10, 'Cloud Computing', 'Rajkumar Buyya', 750);
+
+
+CREATE TABLE STUDENTMASTER ( 
+stud_enrollno INT PRIMARY KEY, 
+sname VARCHAR(100) NOT NULL, 
+class VARCHAR(20) NOT NULL, 
+dept VARCHAR(50) NOT NULL 
+); 
+
+insert into STUDENTMASTER values
+(101, 'Ravi Patel', 'SY', 'Computer'), 
+(102, 'Sneha Shah', 'FY', 'Electronics'), 
+(103, 'Arjun Mehta', 'TY', 'Computer'), 
+(104, 'Meera Joshi', 'SY', 'IT'), 
+(105, 'Kunal Shah', 'TY', 'Computer'), 
+(106, 'Nisha Verma', 'FY', 'Mechanical'), 
+(107, 'Pooja Singh', 'SY', 'Computer'), 
+(108, 'Anil Rao', 'TY', 'Civil'), 
+(109, 'Dinesh Jain', 'SY', 'Computer'), 
+(110, 'Seema Desai', 'FY', 'Computer'); 
+
+SELECT * FROM BOOKMASTER;
+
+CREATE TABLE ACCESSIONTABLE ( 
+bid INT not null,
+accession_no INT PRIMARY KEY, 
+avail CHAR(1) NOT NULL CHECK (avail IN ('T', 'F'))
+FOREIGN KEY (bid) REFERENCES BOOKMASTER(bid) 
+);
+
+
+INSERT INTO ACCESSIONTABLE VALUES 
+(1,1001, 'T'), (2,1002, 'F'), (3,1003, 'T'), (4,1004, 'F'), (5,1005, 'T'), 
+(6,1006, 'F'), (7,1007, 'T'), (8,1008, 'F'), (9,1009, 'T'), (10,1010, 'F');
+
+
+
+CREATE TABLE ISSUETABLE ( 
+issueid INT PRIMARY KEY, 
+accession_no INT NOT NULL, 
+stud_enrollno INT NOT NULL, 
+issuedate DATE NOT NULL, 
+duedate DATE NOT NULL, 
+ret_date DATE, 
+bid INT NOT NULL, 
+FOREIGN KEY (accession_no) REFERENCES ACCESSIONTABLE(accession_no), 
+FOREIGN KEY (stud_enrollno) REFERENCES STUDENTMASTER(stud_enrollno), 
+FOREIGN KEY (bid) REFERENCES BOOKMASTER(bid) 
+);
+
+INSERT INTO ISSUETABLE VALUES
+(1, 1001, 101, '2024-05-01', '2024-05-08', '2024-05-10', 1),
+(2, 1003, 103, '2024-05-03', '2024-05-10', '2024-05-09', 2), 
+(3, 1004, 105, '2024-05-04', '2024-05-11', NULL, 3), 
+(4, 1006, 107, '2024-05-02', '2024-05-09', '2024-05-10', 5), 
+(5, 1008, 109, '2024-05-01', '2024-05-08', NULL, 7), 
+(6, 1009, 110, '2024-05-03', '2024-05-10', '2024-05-20', 8), 
+(7, 1010, 101, '2024-05-05', '2024-05-12', NULL, 9), 
+(8, 1001, 103, '2024-04-15', '2024-04-22', '2024-04-20', 1), 
+(9, 1004, 105, '2024-04-20', '2024-04-27', '2024-05-01', 3), 
+(10, 1006, 109, '2024-05-01', '2024-05-08', NULL, 5); 
+
+--Query 1 :  Find the name of books which is issued maximum times.
+
+select b.title, COUNT(*) as IssueCount
+from BOOKMASTER as b
+join ISSUETABLE as i
+on i.bid = b.bid
+group by b.title
+order by IssueCount desc;
+
+--Query 2 : • Find the detail information of books that are issued by computer department students. 
+
+select distinct b.*, s.dept from BOOKMASTER as b
+join ISSUETABLE as i on b.bid = i.bid
+join STUDENTMASTER as s on i.stud_enrollno = s.stud_enrollno
+where s.dept = 'Computer';
+
+--Query 3 : Write a procedure to calculate the fines for the books which are not return on or before due date. no. of days = (return_date - due_date) fine = no. of days (return_date - due_date) * 10
+
+create procedure calculate_fines as
+begin
+	declare @issueId int, @DayCount int, @fine int;
+
+	select *,
+	datediff(day,i.duedate,i.ret_date) as Day_difference,
+	(datediff(day,i.duedate,i.ret_date) * 10) as Fine
+	from ISSUETABLE as i;
+
+end;
+
+calculate_fines;
+
+--Query 4 : Write a trigger on insert of ISSUETABLE such that due_date = issue_date + 7 
+
+create trigger deuDate_trg on ISSUETABLE
+after insert as
+begin
+	if exists(select 1 from inserted where DATEDIFF(DAY,issuedate,ret_date) > 7)
+	begin
+		raiserror('The due date can not exceed 7 days',16,1);
+		rollback;
+	end;
+end;
+
+--test
+INSERT INTO ISSUETABLE VALUES
+(12, 1001, 101, '2024-05-01', '2024-05-08', '2024-05-20', 1);
+
+--Query 5 : • Find the detail information of the students who have issued books Between two given dates. 
+
+select s.*, i.issuedate, b.title,b.author
+from STUDENTMASTER as s
+join ISSUETABLE as i on i.stud_enrollno = s.stud_enrollno
+join BOOKMASTER as b on i.bid = b.bid
+where i.issuedate between '2024-05-01' and '2024-06-01';
+
+--Query 6: Create a view that display all the accession information for a book having bid = 100 
+
+create view book_info as
+select b.*, a.avail from BOOKMASTER as b 
+join ACCESSIONTABLE as a 
+on a.bid = b.bid
+where a.bid = 1;
+
+select * from book_info;
+
+--Query 7:  Find the information of books issued by MCA students.
+
+select distinct b.*, s.dept from BOOKMASTER as b
+join ISSUETABLE as i on b.bid = i.bid
+join STUDENTMASTER as s on i.stud_enrollno = s.stud_enrollno
+where s.dept = 'MCA';
+
+-- Query 8 : Find the number of books available in the library & written by "Henry Korth".
+
+select b.*,a.avail from BOOKMASTER as b
+join ACCESSIONTABLE as a
+on a.bid = b.bid
+where a.avail = 'T' and b.author = 'Henry Korth';
+
+-- Query 9 : Find the number of books issued by each student. 
+
+select s.stud_enrollno,s.sname ,COUNT(*) as BooksIssued
+from STUDENTMASTER as s
+join ISSUETABLE as i on s.stud_enrollno = i.stud_enrollno
+join BOOKMASTER as b on i.bid = b.bid
+group by s.stud_enrollno,s.sname
+order by BooksIssued desc;
+
+--Query 10 : Write a trigger such that the return date should not exceed today's date.
+
+create trigger returnDate_trg on ISSUETABLE
+after insert,update as
+begin
+	if exists (select 1 from inserted where ret_date > GETDATE())
+	begin
+		raiserror('The return date cannot exceed the current date',16,1);
+		rollback;
+	end;
+end;
+
+update ISSUETABLE set ret_date = '2026-03-03' where issueid = 1;
+
+--Query 11: Write a procedure for giving the detail information of books available in the library. 
+
+create procedure bookInfo as
+begin
+	select b.*,a.avail from BOOKMASTER as b
+	join ISSUETABLE as i on b.bid = i.bid
+	join ACCESSIONTABLE as a on a.accession_no = i.accession_no
+	where a.avail = 'T';
+end;
+
+bookInfo;
