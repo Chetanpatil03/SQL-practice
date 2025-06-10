@@ -90,7 +90,7 @@ on i.bid = b.bid
 group by b.title
 order by IssueCount desc;
 
---Query 2 : • Find the detail information of books that are issued by computer department students. 
+--Query 2 : Find the detail information of books that are issued by computer department students. 
 
 select distinct b.*, s.dept from BOOKMASTER as b
 join ISSUETABLE as i on b.bid = i.bid
@@ -128,7 +128,7 @@ end;
 INSERT INTO ISSUETABLE VALUES
 (12, 1001, 101, '2024-05-01', '2024-05-08', '2024-05-20', 1);
 
---Query 5 : • Find the detail information of the students who have issued books Between two given dates. 
+--Query 5 : Find the detail information of the students who have issued books Between two given dates. 
 
 select s.*, i.issuedate, b.title,b.author
 from STUDENTMASTER as s
