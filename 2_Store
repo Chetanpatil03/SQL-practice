@@ -178,3 +178,22 @@ end;
 
 select * from PC;
 update PC set HD = 10.00 where model_no = 'M001';
+
+
+--Query 11 :  Express the following constraint as SQL assertions - "No black & white printer should have price greater than color printers." 
+--the assertion not work in SQL server
+
+create trigger price_check on PRINTER 
+AFTER INSERT,UPDATE AS
+begin 
+	if exists (select 1 from inserted as i where i.Price > (select min(Price) from PRINTER  as p where Color = 'T') and Color = 'F')
+	begin
+		raiserror('The price of the black and White printer should be lesser than the Price of Color printer',16,1);
+		rollback;
+	end;
+end;
+
+
+update PRINTER set Type = 'Laser' ,Color = 'F' where model_no = 'M006' ;
+
+select * from PRINTER;
