@@ -1,0 +1,215 @@
+create database company_two;
+use company_two;
+
+CREATE TABLE EMPLOYEE ( 
+fname VARCHAR(50) NOT NULL, 
+lname VARCHAR(50) NOT NULL, 
+ssn CHAR(9) PRIMARY KEY NOT NULL, -- Social Security Number 
+sex CHAR(1) CHECK (sex IN ('M', 'F')) NOT NULL, 
+salary DECIMAL(10, 2) NOT NULL, 
+joindate DATE NOT NULL, 
+superssn CHAR(9), 
+dno INT CHECK (dno < 1000) NOT NULL, -- Department number less than 4 digits 
+FOREIGN KEY (superssn) REFERENCES EMPLOYEE(ssn), 
+FOREIGN KEY (dno) REFERENCES DEPT(dnum) 
+); 
+
+-- Insert records into EMPLOYEE 
+INSERT INTO EMPLOYEE (fname, lname, ssn, sex, salary, joindate, superssn, dno) VALUES 
+('John', 'Doe', 'e101', 'M', 60000, '2010-01-15', NULL, 101),
+('Jane', 'Smith', 'e102', 'F', 65000, '2012-03-22', null, 102), 
+('Alice', 'Johnson', 'e103', 'F', 70000, '2015-06-10', NULL, 103), 
+('Bob', 'Brown', 'e104', 'M', 55000, '2018-09-05', NULL, 104), 
+('Charlie', 'Davis', 'e105', 'M', 48000, '2020-11-30', NULL, 105), 
+('David', 'Martinez', 'e106', 'M', 53000, '2017-02-14', 'e102', 101), 
+('Eva', 'Garcia', 'e107', 'F', 75000, '2013-08-19', 'e101', 102), 
+('Frank', 'Wilson', 'e108', 'M', 80000, '2016-05-25', 'e103', 103), 
+('Grace', 'Moore', 'e109', 'F', 68000, '2019-01-10', 'e104', 104), 
+('Henry', 'Taylor', 'e110', 'M', 72000, '2021-07-04', 'e105', 105);
+
+INSERT INTO EMPLOYEE VALUES
+('Irene', 'Clark', 'e111', 'F', 62000, '2022-03-01', 'e102', 101),
+('Jack', 'Lee', 'e112', 'M', 54000, '2021-12-15', 'e101', 102),
+('Karen', 'Young', 'e113', 'F', 58000, '2023-01-20', 'e103', 103),
+('Leo', 'Walker', 'e114', 'M', 51000, '2022-08-05', 'e104', 104),
+('Mia', 'Hall', 'e115', 'F', 56000, '2024-02-10', 'e102', 101);
+
+
+
+select * from EMPLOYEE;
+
+CREATE TABLE DEPT ( 
+dname VARCHAR(50) NOT NULL, 
+dnum INT PRIMARY KEY CHECK (dnum < 1000), -- Department number less than 4 digits 
+dlocation VARCHAR(100) NOT NULL,  
+);
+
+UPDATE DEPT SET mgrssn = 'e102' WHERE dnum = 101;
+UPDATE DEPT SET mgrssn = 'e101' WHERE dnum = 102;
+UPDATE DEPT SET mgrssn = 'e103' WHERE dnum = 103;
+UPDATE DEPT SET mgrssn = 'e104' WHERE dnum = 104;
+UPDATE DEPT SET mgrssn = 'e105' WHERE dnum = 105;
+
+INSERT INTO DEPT (dname, dnum, dlocation) VALUES 
+('HR', 101, 'New York'), 
+('Finance', 102, 'London'), 
+('IT', 103,'San Francisco'), 
+('Marketing', 104, 'Tokyo'), 
+('Sales', 105,'Berlin');
+
+
+
+
+ALTER TABLE DEPT add  mgrssn CHAR(9) foreign key references EMPLOYEE(ssn);
+select * from DEPT;
+
+
+
+CREATE TABLE PROJECT ( 
+pname VARCHAR(50) NOT NULL, 
+pno INT PRIMARY KEY CHECK (pno < 1000), -- Project number less than 4 digits 
+plocation VARCHAR(100) NOT NULL, 
+dnumber INT CHECK (dnumber < 1000) NOT NULL, -- Department number less than 4 digits 
+FOREIGN KEY (dnumber) REFERENCES DEPT(dnum) 
+); 
+
+-- Insert records into PROJECT 
+INSERT INTO PROJECT (pname, pno, plocation, dnumber) VALUES 
+('Project Alpha', 101, 'New York', 101), 
+('Project Beta', 102, 'London', 102), 
+('Project Gamma', 103, 'San Francisco', 103), 
+('Project Delta', 104, 'Jalgaon', 104), 
+('Project Epsilon', 105, 'Berlin', 105), 
+('Project Zeta', 106, 'Paris', 101), 
+('Project Eta', 107, 'Sydney', 101), 
+('Project Theta', 108, 'Toronto', 102), 
+('Project Iota', 109, 'Dubai', 102), 
+('Project Kappa', 110, 'Singapore', 103); 
+
+CREATE TABLE WORK_ON ( 
+ssn CHAR(9) NOT NULL, -- Employee's SSN 
+pno INT NOT NULL, -- Project number 
+hours DECIMAL(5, 2) NOT NULL, 
+PRIMARY KEY (ssn, pno), 
+FOREIGN KEY (ssn) REFERENCES EMPLOYEE(ssn), 
+FOREIGN KEY (pno) REFERENCES PROJECT(pno) 
+);
+
+INSERT INTO WORK_ON (ssn, pno, hours) VALUES 
+('e102', 101, 40), 
+('e101', 102, 35), 
+('e103', 103, 45), 
+('e104', 104, 30), 
+('e105', 105, 25);
+
+
+select * from EMPLOYEE;
+select * from DEPT;
+select * from PROJECT;
+select * from WORK_ON;
+
+--Query 1 :  Find the ssn of all employees who work on pno 101, 102 or 103
+
+select e.ssn,e.fname from EMPLOYEE as e
+join WORK_ON as w on w.ssn = e.ssn
+join PROJECT as p on p.pno=w.pno
+where w.pno in (101,102,103);
+
+--query 2:  Make a list of all pno for project that involve an employee whose last name is 'sonar' either as a worker or as a manager of the dept that control the project.
+
+select p.pno,p.pname, d.dname from PROJECT as p
+join DEPT as d on d.dnum = p.dnumber
+join EMPLOYEE as e on e.ssn = d.mgrssn
+where e.lname = 'Doe';
+
+select * from DEPT;
+
+--Query 3 : Write a trigger on insert on WORK_ON table such that if total work hours of employee in company is less than 20 hours then his salary is deducted.
+
+create trigger total_hr_trg on WORK_ON
+AFTER INSERT AS
+begin
+	if exists(select 1 from inserted where hours < 20)
+	begin 
+		raiserror('The salary od the employee will be cut beacause his work hours are less than 20',16,1);
+		rollback;
+	end;
+	else
+		print('Inserted successfully');
+end;
+
+--test
+insert into WORK_ON values('e106','108',12);
+
+-- Query 4 :  For each employee, Find the employee first & last name & the first & last name of his or her immediate supervisor. 
+
+select e2.fname as Employee_First, e2.lname as Employee_Last, 
+e1.fname as Supervisor_First, e1.lname as Supervisor_Last
+from EMPLOYEE as e1
+join EMPLOYEE as e2 on e1.ssn = e2.superssn;
+
+
+--Query 5:  For each dept, Find the deptno, the no. of employees in the dept & their average salary. 
+
+
+select e.dno as Department_number, d.dname, COUNT(*) as Totalemp, AVG(salary) 
+from  EMPLOYEE as e
+join DEPT as d on d.dnum = e.dno
+group by e.dno,dname
+order by Totalemp;
+
+
+--Query 6 : For every project located in 'Jalgaon". List the pno, the controlling detptno and dept manager last name. 
+select p.pno, d.dnum,e.lname from PROJECT as p
+join DEPT as d on p.dnumber = d.dnum
+join EMPLOYEE as e on d.mgrssn = e.superssn
+where p.plocation = 'Jalgaon';
+
+
+-- Query 7 : Create a view that has pname, controlling dept name, no of employees, & total hours worked per week on the project for each project with more than one employee working on it.
+
+create view details as
+select p.pname, d.dname, COUNT(*) as Totalemp, SUM(w.hours) as TotalHours
+from PROJECT as p
+join DEPT as d on d.dnum = p.dnumber
+join EMPLOYEE as e on e.dno= d.dnum
+join WORK_ON as w on e.ssn = w.ssn
+group by p.pname, d.dname;
+
+select * from details; 
+
+-- Query 8 : Create a procedure on EMPLOYEE table to determine the employees who will get promotion. (An employee will get promotion after working on 5 projects.) 
+
+create procedure promotion as
+begin
+	declare  @emp_id varchar(10);
+
+	select 
+	e.fname +' '+e.lname as Employee_name,
+	COUNT(w.Pno) as Project_worked
+	from EMPLOYEE as e
+	join WORK_ON as w on w.ssn = e.ssn
+	group by e.fname,e.lname,e.ssn
+	having COUNT(w.pno) > 5;
+end;
+
+--Query 9 :  create a view that has the deptname, manager_name & manager salary for every dept.
+
+create view info as
+select d.dname,e.fname +' '+e.lname as Manger_name, e.salary
+from DEPT as d
+join EMPLOYEE as e
+on d.mgrssn = e.ssn;
+
+select * from info;
+
+--Query 10 : For each project on which more than two employee work, Find the pno, pname & no. of employees who work on the project. 
+
+select w.pno, p.pname, COUNT(e.ssn) as Number_of_employees
+from PROJECT as p
+join WORK_ON as w on p.pno = w.pno
+join EMPLOYEE as e on w.ssn = e.ssn
+group by w.pno,p.pname
+having COUNT(w.ssn) > 2 ;
+
+--Query 11 : 
