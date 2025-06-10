@@ -92,11 +92,8 @@ end;
 
 find_maker;
 
-select maker from PRODUCT where 
-model_no in (select model_no from LAPTOP where Price in 
-(select MAX(Price) from LAPTOP));
-
 --Query 4 : Find the different types of printers produced by Epson. 
+
 select p1.model_no,p1.Color,p1.Type,p1.Price, p2.maker,p2.type
 from PRINTER as p1
 join PRODUCT as p2 
@@ -104,19 +101,24 @@ on p1.model_no = p2.model_no
 where p2.maker = 'Epson';
 
 --Query 5 :  Find those hard disk sizes which occur in two or more PCs. 
+
 select HD, COUNT(*) as Frequency 
 from PC group by HD having COUNT(*) >=2;
 
 
 --Query 6 :  Find the manufacturers of color printers. 
+
 select p1.maker, p1.model_no, p2.Color from PRODUCT as p1
 join PRINTER as p2
 on p1.model_no = p2.model_no
 where p2.Color = 'T';
 
 -- Query 7:  Find the laptops whose speed is slower than that of any PC. 
-Select top 1 * from LAPTOP order by Speed asc;
-select * from LAPTOP;
+Select top 1 l.model_no,l.Speed  from LAPTOP as l 
+join PRODUCT as p on p.model_no = l.model_no
+join PC as p1 on p.model_no = p1.model_no
+group by l.model_no,l.Speed
+having MIN(l.Speed) < MAX(p1.Speed);
 
 --triggers : 
 
