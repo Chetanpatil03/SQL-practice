@@ -1,0 +1,100 @@
+--Query : Demonstrate the use of cursor using PRODUCT table. 
+
+declare @maker varchar(10), @modelno varchar(10), @type varchar(10)
+
+declare product_info cursor for
+select maker,model_no,type from PRODUCT;
+
+open product_info;
+
+fetch next from product_info into @maker,@modelno,@type;
+
+while @@FETCH_STATUS = 0
+	begin 
+	print 'Maker : ' + @maker + '  Model no : ' + @modelno + ' Type : '+@type;
+	fetch next from product_info into @maker,@modelno,@type;
+	end;
+
+CLOSE product_info; 
+DEALLOCATE product_info;
+
+--Query : write a cursor on CUSTOMER table to fetch the last row.
+
+select * from CUSTOMER;
+
+declare @custid varchar(10),@name varchar(20),@add varchar(20),@accno varchar(10);
+
+declare cust_info cursor scroll for
+select cust_id,name,address,accno from CUSTOMER;
+
+open cust_info;
+
+fetch last from cust_info into @custid,@name,@add,@accno;
+
+	print 'Last row ->  '+' Cust id : '+@custid+'  Name : '+@name+'  Address : '+@add+'  Account number : '+@accno;
+	
+close cust_info;
+deallocate cust_info;
+
+--Query 21 :  Write a cursor on PATIENTMASTER table to fetch the last record & display the rows in that table.
+
+select * FROM PATIENTMASTER;
+
+
+CREATE PROCEDURE info as
+begin 
+	declare @code varchar(10) ,@name varchar(20),@add varchar(20),@age varchar(10),@gender char,@bloodgrp varchar(3),@did varchar(10), @count varchar(10);
+	
+	select @count = COUNT(Pname)
+	from PATIENTMASTER;
+
+	declare patient_info cursor scroll for
+	select Pcode,Pname,Padd,age,gender,bloodgroup,Did from PATIENTMASTER;
+
+
+	open patient_info;
+
+	fetch last from patient_info into @code,@name,@add,@age,@gender,@bloodgrp,@did;
+	
+	print 'Number of rows : ' + @count;
+	print 'Last row ->  '+' Patient id : '+@code+'  Name : '+@name+'  Address : '+@add+'  Age : '+@age+ ' Gender : '+@gender+' BloodGroup : '+@bloodgrp+' Doctor id: '+@did;
+	
+	close patient_info;
+	deallocate patient_info;
+
+end;
+
+exec info;
+drop procedure info;
+
+
+--Query 22 :  write a cursor on DOCTOR table to fetch the first row & display the number of rows present in the table. 
+
+CREATE PROCEDURE info_doc as
+begin 
+	declare @did varchar(10) ,@name varchar(20),@add varchar(20),@qualification varchar(10), @count varchar(10);
+	
+	select @count = COUNT(Dname)
+	from DOCTOR;
+
+	declare patient_info cursor scroll for
+	select Did,Dname,Daddress,qualification from DOCTOR;
+
+
+	open patient_info;
+
+	fetch next from patient_info into @did,@name,@add,@qualification;
+	
+	print 'Number of rows : ' + @count;
+	print 'First row ->  '+' Doctor id : '+@did+'  Name : '+@name+'  Address : '+@add+'  Qualification : '+@qualification;
+	
+	close patient_info;
+	deallocate patient_info;
+
+end;
+
+exec info_doc;
+select * from DOCTOR;
+
+drop procedure info_doc;
+
