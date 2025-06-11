@@ -98,3 +98,29 @@ select * from DOCTOR;
 
 drop procedure info_doc;
 
+--Query 10:  Write a cursor on ACCOUNT table of balance attribute such that if the balance is less than 10000 then print the 'loan is not provided' else 'loan is provided'.
+
+select * from ACCOUNT;
+
+declare @account int, @balance money;
+
+declare check_eligible cursor for
+select accno,balance from ACCOUNT;
+
+open check_eligible;
+
+fetch next from check_eligible into @account,@balance;
+
+while @@FETCH_STATUS =0
+begin 
+	if @balance < 10000
+		print 'Account number : '+cast(@account as varchar(20))+' -> loan is not provided ';
+	else 
+		print 'Account number : '+cast(@account as varchar(20))+' -> loan is provided ';
+
+	fetch next from check_eligible into @account,@balance;
+end;
+
+close check_eligible;
+deallocate check_eligible;
+
